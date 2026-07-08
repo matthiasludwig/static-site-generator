@@ -17,11 +17,27 @@ def split_nodes_delimiter(old_nodes: list[TextNode], delimiter: str, text_type: 
     new_nodes = []
 
     for node in old_nodes:
-        if node.text_type == text_type:
-            if delimiter not in node.text:
-                raise ValueError(f"Delimiter '{delimiter}' not found in text: {node.text}")
+        # If the node is not TEXT just add it to the return list
+        if node.text_type != TextType.TEXT:
+            new_nodes.append(node)
+            continue
+        # If the node is TEXT and contains the delimiter, split it into multiple nodes
+        if node.text_type == TextType.TEXT and delimiter in node.text:
             parts = node.text.split(delimiter)
-            new_nodes.extend([TextNode(part, text_type) for part in parts])
+
+            if len(parts) % 2 == 0:
+                raise ValueError(f"Malformed delimiter in text: {node.text}")
+
+            
+            for i, part in enumerate(parts):
+                if part == "":
+                    continue  # Skip empty parts
+                if i % 2 == 0:
+                    new_nodes.append(TextNode(part, TextType.TEXT))
+                else:
+                    new_nodes.append(TextNode(part, text_type))
+        else:
+            new_nodes.append(node)
     
     return new_nodes
 
@@ -90,14 +106,46 @@ def split_nodes_link(old_nodes: list[TextNode]) -> list[TextNode]:
     return new_nodes
 
 def text_to_textnodes(text: str) -> list[TextNode]:
-    text_nodes = []
+    text_nodes = [TextNode(text, TextType.TEXT)]
 
-    text_nodes = split_nodes_image([TextNode(text, TextType.TEXT)])
+    # 1. split bold text
+    text_nodes = split_nodes_delimiter(text_nodes, "**", TextType.BOLD)
+    # 2. split italic text
+    text_nodes = split_nodes_delimiter(text_nodes, "_", TextType.ITALIC)
+    # 3. split code text
+    text_nodes = split_nodes_delimiter(text_nodes, "`", TextType.CODE)
+    # 4. split images
+    text_nodes = split_nodes_image(text_nodes)
+    # 5. split links
     text_nodes = split_nodes_link(text_nodes)
 
     return text_nodes
 
+def normalize_indentation(markdown: str) -> str:
+    lines = markdown.splitlines()
+
+    while lines and lines[0].strip() == "":
+        lines.pop(0)
+    while lines and lines[-1].strip() == "":
+        lines.pop()
+
+    non_empty_lines = [line for line in lines if line.strip() != ""]
+    if not non_empty_lines:
+        return ""
+
+    min_indent = min(len(line) - len(line.lstrip(" ")) for line in non_empty_lines)
+
+    normalized_lines = []
+    for line in lines:
+        if line.strip() == "":
+            normalized_lines.append("")
+        else:
+            normalized_lines.append(line[min_indent:])
+
+    return "\n".join(normalized_lines)
+
 def markdown_to_blocks(markdown: str) -> list[str]:
+    markdown = normalize_indentation(markdown)
     blocks = markdown.split("\n\n")
     return [block.strip() for block in blocks if block.strip()]
 
@@ -165,7 +213,8 @@ def markdown_to_html_node(markdown: str) -> HTMLNode:
             HTMLParent = ParentNode(tag=tag, children=[code_node])
         elif block_type == BlockType.PARAGRAPH:
             tag = "p"
-            HTMLParent = ParentNode(tag=tag, children=text_to_children(block))
+            paragraph_text = " ".join(block.splitlines())
+            HTMLParent = ParentNode(tag=tag, children=text_to_children(paragraph_text))
         WrappingNode.children.append(HTMLParent)
 
     return WrappingNode

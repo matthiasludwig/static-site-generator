@@ -1,29 +1,10 @@
 import unittest
-from helper import BlockType, markdown_to_html_node, split_nodes_delimiter, extract_markdown_images, extract_markdown_links, split_nodes_image, split_nodes_link, text_to_textnodes
+from helper import BlockType, block_to_block_type, markdown_to_blocks, markdown_to_html_node, split_nodes_delimiter, extract_markdown_images, extract_markdown_links, split_nodes_image, split_nodes_link, text_to_textnodes
 from textnode import TextNode, TextType
 
 
 
 class TestHelperMethods(unittest.TestCase):
-    def test_split_nodes_delimiter(self):
-        # Test case 1: Basic splitting
-        nodes = [TextNode("Hello,World", TextType.TEXT)]
-        result = split_nodes_delimiter(nodes, ",", TextType.TEXT)
-        self.assertEqual(len(result), 2)
-        self.assertEqual(result[0].text, "Hello")
-        self.assertEqual(result[1].text, "World")
-
-        # Test case 2: No delimiter present
-        nodes = [TextNode("Hello World", TextType.TEXT)]
-        with self.assertRaises(ValueError):
-            split_nodes_delimiter(nodes, ",", TextType.TEXT)
-
-        # Test case 3: Different text type
-        nodes = [TextNode("Hello,World", TextType.BOLD)]
-        result = split_nodes_delimiter(nodes, ",", TextType.BOLD)
-        self.assertEqual(len(result), 2)
-        self.assertEqual(result[0].text, "Hello")
-        self.assertEqual(result[1].text, "World")
 
     def test_extract_markdown_images(self):
         matches = extract_markdown_images(
