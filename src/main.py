@@ -1,4 +1,4 @@
-from gencontent import generate_page
+from gencontent import generate_page, generate_pages_recursive
 from textnode import TextNode, TextType
 import os, shutil
 
@@ -36,6 +36,6 @@ def main():
     copy_static("static", "public")
 
     # Generate page
-    generate_page("content/index.md", "template.html", "public")
+    generate_pages_recursive("content", "template.html", "public")
 
 main()
