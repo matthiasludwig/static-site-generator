@@ -1,3 +1,4 @@
+from gencontent import generate_page
 from textnode import TextNode, TextType
 import os, shutil
 
@@ -33,5 +34,8 @@ def clean_up(dest: str):
 def main():
     clean_up("public")
     copy_static("static", "public")
+
+    # Generate page
+    generate_page("content/index.md", "template.html", "public")
 
 main()
