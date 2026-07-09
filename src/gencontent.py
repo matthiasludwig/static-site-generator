@@ -37,8 +37,8 @@ def generate_page(from_path: str, template_path: str, dest_path: str, basepath: 
     final_html = template_content.replace("{{ Content }}", html_string)
     final_html = final_html.replace("{{ Title }}", document_title)
     # Replace links to with basepath
-    final_html = final_html.replace('href="/', f'href="{basepath}')
-    final_html = final_html.replace('src="/', f'src="{basepath}')
+    final_html = final_html.replace('href="/', f'href="/{basepath}')
+    final_html = final_html.replace('src="/', f'src="/{basepath}')
 
     # Write the final HTML content to the destination file
     if not os.path.exists(dest_path):
