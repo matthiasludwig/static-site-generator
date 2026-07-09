@@ -1,3 +1,5 @@
+import sys
+
 from gencontent import generate_page, generate_pages_recursive
 from textnode import TextNode, TextType
 import os, shutil
@@ -32,10 +34,13 @@ def clean_up(dest: str):
 
 
 def main():
-    clean_up("public")
-    copy_static("static", "public")
+    # get the first command line argument
+    basepath = sys.argv[1] if len(sys.argv) > 1 else "/"
+
+    clean_up("docs")
+    copy_static("static", "docs")
 
     # Generate page
-    generate_pages_recursive("content", "template.html", "public")
+    generate_pages_recursive("content", "template.html", "docs", basepath)
 
 main()

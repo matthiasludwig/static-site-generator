@@ -3,6 +3,5 @@ __pycache__/
 .DS_Store
 
 # Ignore content
-public/
 content/
 static/
